@@ -30,10 +30,10 @@ public class Main {
 
             if (choice == 1){
                 System.out.println("Welcome Customer");
-                handleCarPark(scanner,displayMap,parkingslots);
+                handleCarPark(displayMap,parkingslots);
             } else if (choice == 2 ) {
                 System.out.println("Welcome Admin");
-                handleAdmin(scanner,parkingslots);
+                handleAdmin(parkingslots);
             } else if (choice == 3) {
                 System.out.println("Display Board");
                 displayboard(displayMap,parkingslots);
@@ -51,8 +51,8 @@ public class Main {
         dsp.vehicleParkedLevelWise(displayMap,parkingslots.size());
     }
 
-    private static void handleCarPark(Scanner scanner, Map<String, ParkingTicket> displayMap,Map<Integer, SlotMap> parkingslots) {
-
+    private static void handleCarPark(Map<String, ParkingTicket> displayMap,Map<Integer, SlotMap> parkingslots) {
+        Scanner scanner = new Scanner(System.in);
         VehicleServiceImpl vehicleServiceImpl = new VehicleServiceImpl();
 
         System.out.println("Enter Vehicle Type : \n 1. CAR \n 2. BIKE \n 3. BUS \n 4. EV");
@@ -110,18 +110,18 @@ public class Main {
         }
     }
 
-    private static void handleAdmin(Scanner scanner, Map<Integer, SlotMap> parkingslots) {
-
+    private static void handleAdmin(Map<Integer, SlotMap> parkingslots) {
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Choose from below option : \n 1. Add New Level \n 2. Remove Existing Level");
         int options = scanner.nextInt();
 
         AdminServiceImpl adminServiceImpl = new AdminServiceImpl();
 
         if(options == 1){
-            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.addLevel(scanner,parkingslots);
+            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.addLevel(parkingslots);
             System.out.println(addParkingSlots);
         } else if (options == 2) {
-            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.removeLevel(scanner,parkingslots);
+            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.removeLevel(parkingslots);
             System.out.println(addParkingSlots);
         } else {
             System.out.println("Inavlid Input");

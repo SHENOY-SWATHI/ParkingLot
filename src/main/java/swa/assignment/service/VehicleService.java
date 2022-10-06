@@ -6,7 +6,6 @@ import swa.assignment.model.Vehicle;
 import swa.assignment.model.VehicleType;
 
 import java.util.Map;
-import java.util.Scanner;
 
 public interface VehicleService {
 

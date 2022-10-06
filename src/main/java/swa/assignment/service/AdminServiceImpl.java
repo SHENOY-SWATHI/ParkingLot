@@ -11,20 +11,22 @@ import java.util.Scanner;
 
 public class AdminServiceImpl implements AdminService {
     @Override
-    public Map<Integer, SlotMap> addLevel(Scanner scanner, Map<Integer, SlotMap> parkingSlots) {
+    public Map<Integer, SlotMap> addLevel(Map<Integer, SlotMap> parkingSlots) {
+        Scanner scanner = new Scanner(System.in);
         if (parkingSlots.isEmpty()){
-            SlotMap st = slotAddition(scanner);
+            SlotMap st = slotAddition();
             parkingSlots.put(1,st);
             return parkingSlots;
         }else{
-            SlotMap st = slotAddition(scanner);
+            SlotMap st = slotAddition();
             parkingSlots.put(parkingSlots.size()+1,st);
             return parkingSlots;
         }
     }
 
-    private SlotMap slotAddition(Scanner scanner) {
+    private SlotMap slotAddition() {
 
+        Scanner scanner = new Scanner(System.in);
         SlotMap slotMap = new SlotMap();
         Map<VehicleType,Integer> slotViewMap = new HashMap<>();
         System.out.println("Enter slot availability for Car");
@@ -45,7 +47,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Map<Integer, SlotMap> removeLevel(Scanner scanner, Map<Integer, SlotMap> parkingSlots) {
+    public Map<Integer, SlotMap> removeLevel(Map<Integer, SlotMap> parkingSlots) {
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the Level to be removed");
         int levelremove = scanner.nextInt();
         System.out.println("Are you sure : Y/N");
@@ -55,7 +58,7 @@ public class AdminServiceImpl implements AdminService {
             return parkingSlots;
         } else if(rmvConfirmation.equalsIgnoreCase("N")){
             System.out.println("Exiting Admin Panel");
-            return null;
+            return parkingSlots;
         }else{
             System.out.println("Invalid Entry");
             System.out.println("Exiting Admin Panel");
