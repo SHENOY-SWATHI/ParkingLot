@@ -1,5 +1,6 @@
 package swa.assignment.service;
 
+import swa.assignment.Exception.NoParkingSlotException;
 import swa.assignment.model.ParkingTicket;
 import swa.assignment.model.SlotMap;
 import swa.assignment.model.Vehicle;
@@ -15,13 +16,11 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public ParkingTicket createEntry(Vehicle v, int level, int counter) {
-        StringBuilder str = new StringBuilder();
 
         ParkingTicket pt = new ParkingTicket();
-        str.append(level).append('L').append(counter);
         pt.setVehicleDetails(v);
         pt.setLevel(level);
-        pt.setVehicleRef(str.toString());
+        pt.setVehicleRef(String.valueOf(level) + 'L' + counter);
         pt.setEntryDate(LocalDate.now());
         pt.setEntryTime(LocalTime.now());
 
@@ -49,29 +48,42 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public boolean checkAvailabilty(Map<String, ParkingTicket> displayMap, Map<Integer, SlotMap> parkingslots, VehicleType vehicleType)  {
-        for(Map.Entry<Integer, SlotMap> i:parkingslots.entrySet()){
-            Map<VehicleType, Integer> specificType = new HashMap<>();
-            List<ParkingTicket> f1 = displayMap.entrySet().stream()
-                    .filter(p->p.getKey().substring(0,1).equalsIgnoreCase(Integer.toString(i.getKey())))
-                    .map(Map.Entry::getValue).collect(Collectors.toList());
-            for(ParkingTicket pttemp: f1) {
-                VehicleType keyCheck = pttemp.getVehicleDetails().getVehicleType();
-                if (specificType.containsKey(keyCheck)){
-                    specificType.put(keyCheck,specificType.get(keyCheck) + 1);
-                } else {
-                    specificType.put(keyCheck,1);
-                }
-            }
-            checkVehicleBasedAvailability(vehicleType);
-            System.out.println(specificType.equals(parkingslots.get(i.getKey()).getSlot()));
-        }
+    public boolean checkAvailabilty(Map<String, ParkingTicket> displayMap, Map<Integer, SlotMap> parkingslots, VehicleType vehicleType, int level)  {
+        try{
+            SlotMap parkingMap = parkingslots.get(level);
+            if(parkingMap!= null){
+                int sum = parkingMap.getSlot().values().stream().mapToInt(Integer::intValue).sum();
+                Map<VehicleType, Integer> specificType = new HashMap<>();
+                List<ParkingTicket> levelParking = displayMap.entrySet().stream()
+                        .filter(p->p.getKey().substring(0,1).equalsIgnoreCase(Integer.toString(level)))
+                        .map(Map.Entry::getValue).collect(Collectors.toList());
 
-    return true;
+                if (levelParking.size() != sum && !levelParking.isEmpty()){
+                    for(ParkingTicket p : levelParking){
+                        VehicleType specificKey = p.getVehicleDetails().getVehicleType();
+                        if (specificType.containsKey(specificKey)){
+                            specificType.put(specificKey,specificType.get(specificKey)+1);
+                        } else {
+                            specificType.put(specificKey,1);
+                        }
+                    }
+                    return checkVehicleBasedAvailability(vehicleType,specificType,parkingMap.getSlot());
+                }
+            } else{
+                String msg = "No Slot Assigned by Admin";
+                throw new NoParkingSlotException(msg);
+            }
+        } catch (NoParkingSlotException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
-    private void checkVehicleBasedAvailability(VehicleType vehicleType) {
+    private boolean checkVehicleBasedAvailability(VehicleType vehicleType, Map<VehicleType, Integer> specificType, Map<VehicleType, Integer> slot) {
+     int availableLot = slot.get(vehicleType);
+     int occupiedLot = specificType.containsKey(vehicleType) ? specificType.get(vehicleType) : 0;
 
+     return availableLot == occupiedLot ? false : true;
     }
 
     private double caluculatePayment(ParkingTicket pt) {
@@ -81,5 +93,20 @@ public class VehicleServiceImpl implements VehicleService {
 
         long diff = entry.until(exit, ChronoUnit.HOURS);
         return diff<=1 ? 40.00 : (diff -1)*20+40.00;
+    }
+
+    public VehicleType getVehicle(int vehicleTypeNum) {
+        switch (vehicleTypeNum){
+            case 1:
+                return VehicleType.CAR;
+            case 2:
+                return VehicleType.BIKE;
+            case 3:
+                return VehicleType.BUS;
+            case 4:
+                return VehicleType.EV;
+            default:
+                return null;
+        }
     }
 }

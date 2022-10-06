@@ -11,6 +11,7 @@ public interface VehicleService {
 
     ParkingTicket createEntry(Vehicle v , int level, int counter);
     ParkingTicket exitEntry(Map<String,ParkingTicket> displayMap, String refNum);
+    boolean checkAvailabilty(Map<String, ParkingTicket> displayMap, Map<Integer, SlotMap> parkingslots, VehicleType vehicleType, int level);
 
-    boolean checkAvailabilty(Map<String, ParkingTicket> displayMap, Map<Integer, SlotMap> parkingslots, VehicleType vehicleType);
+    VehicleType getVehicle(int vehicleTypeNum);
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface DispalyService {
 
-    void totalParkingAvailable(Map<Integer, SlotMap> parkingslots);
-    void vehicleParked(Map<String, ParkingTicket> displayMap);
+    Map<Integer,Integer> totalParkingAvailable(Map<Integer, SlotMap> parkingslots);
+    long vehicleParked(Map<String, ParkingTicket> displayMap);
     void vehicleParkedLevelWise(Map<String, ParkingTicket> displayMap, int levels);
 }

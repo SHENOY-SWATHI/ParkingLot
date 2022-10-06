@@ -14,29 +14,26 @@ import java.util.stream.Collectors;
 public class DisplayServiceImpl implements  DispalyService{
 
     @Override
-    public void totalParkingAvailable(Map<Integer, SlotMap> parkingslots) {
+    public Map<Integer,Integer> totalParkingAvailable(Map<Integer, SlotMap> parkingslots) {
         System.out.println("_________________________________");
-        parkingslots.entrySet().forEach( level ->{
-            SlotMap st = level.getValue();
+        Map<Integer,Integer> getTotalavability = new HashMap<>();
+        parkingslots.forEach((key, st) -> {
             int sum = st.getSlot().values().stream().mapToInt(Integer::intValue).sum();
-            System.out.println("Total Parking Available in Level "+ level.getKey() + ":" + sum);
+            getTotalavability.put(key, sum);
         });
-        System.out.println("_________________________________");
+        return getTotalavability;
     }
 
     @Override
-    public void vehicleParked(Map<String, ParkingTicket> displayMap) {
+    public long vehicleParked(Map<String, ParkingTicket> displayMap) {
         System.out.println("_________________________________");
-        long count = displayMap.entrySet().stream()
+        return displayMap.entrySet().stream()
                 .filter(list -> list.getValue().getExitTime() == null)
                 .count();
-        System.out.println("Total Vehicle Parked : " + count);
-        System.out.println("_________________________________");
     }
 
     @Override
     public void vehicleParkedLevelWise(Map<String, ParkingTicket> displayMap, int levels) {
-
         while(levels != 0){
             Map<VehicleType, Integer> specificType = new HashMap<>();
             int finalLevels = levels;

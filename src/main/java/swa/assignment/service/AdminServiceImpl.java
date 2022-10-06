@@ -12,16 +12,13 @@ import java.util.Scanner;
 public class AdminServiceImpl implements AdminService {
     @Override
     public Map<Integer, SlotMap> addLevel(Map<Integer, SlotMap> parkingSlots) {
-        Scanner scanner = new Scanner(System.in);
+        SlotMap st = slotAddition();
         if (parkingSlots.isEmpty()){
-            SlotMap st = slotAddition();
             parkingSlots.put(1,st);
-            return parkingSlots;
         }else{
-            SlotMap st = slotAddition();
             parkingSlots.put(parkingSlots.size()+1,st);
-            return parkingSlots;
         }
+        return parkingSlots;
     }
 
     private SlotMap slotAddition() {

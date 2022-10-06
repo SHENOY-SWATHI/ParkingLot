@@ -2,6 +2,9 @@ package swa.assignment;
 
 
 
+import swa.assignment.Exception.InvalidInputException;
+import swa.assignment.Exception.NoParkingSlotException;
+import swa.assignment.Exception.ParkingLotFullException;
 import swa.assignment.model.ParkingTicket;
 import swa.assignment.model.SlotMap;
 import swa.assignment.model.Vehicle;
@@ -46,8 +49,14 @@ public class Main {
 
     private static void displayboard(Map<String, ParkingTicket> displayMap,Map<Integer, SlotMap> parkingslots) {
         DisplayServiceImpl dsp = new DisplayServiceImpl();
-        dsp.totalParkingAvailable(parkingslots);
-        dsp.vehicleParked(displayMap);
+        Map<Integer,Integer> getLevelAvailability = dsp.totalParkingAvailable(parkingslots);
+        getLevelAvailability.forEach((key, value) -> System.out.println("Total Parking Available in Level " + key + ":" + value));
+        System.out.println("_________________________________");
+
+        long count = dsp.vehicleParked(displayMap);
+        System.out.println("Total Vehicle Parked : " + count);
+        System.out.println("_________________________________");
+
         dsp.vehicleParkedLevelWise(displayMap,parkingslots.size());
     }
 
@@ -57,57 +66,61 @@ public class Main {
 
         System.out.println("Enter Vehicle Type : \n 1. CAR \n 2. BIKE \n 3. BUS \n 4. EV");
         int vehicleTypeNum = scanner.nextInt();
-        VehicleType vehicleType = getVehicle(vehicleTypeNum);
+        VehicleType vehicleType = vehicleServiceImpl.getVehicle(vehicleTypeNum);
         System.out.println("Service Opted: \n 1. Entry \n 2. Exit");
         int opted = scanner.nextInt();
 
+        System.out.println("Enter Parking Level");
+        int level = scanner.nextInt();
+        try{
+            if (!parkingslots.isEmpty()){
+                try{
+                    if (opted ==1){
+                        try{
+                            if (displayMap.isEmpty() || vehicleServiceImpl.checkAvailabilty(displayMap,parkingslots,vehicleType,level)){
+                                System.out.println("Enter Vehicle Number");
+                                int vehicleNumber = scanner.nextInt();
 
-        if (opted ==1){
-                System.out.println("Enter Vehicle Number");
-                int vehicleNumber = scanner.nextInt();
+                                System.out.println("Enter Owner Name");
+                                String vehicleOwner = scanner.next();
 
-                System.out.println("Enter Owner Name");
-                String vehicleOwner = scanner.next();
+                                Vehicle v = new Vehicle(vehicleNumber,vehicleOwner, vehicleType);
+                                int counter = displayMap.isEmpty() ? 1 : displayMap.size()+1;
 
-                Vehicle v = new Vehicle(vehicleNumber,vehicleOwner, vehicleType);
-                int counter = displayMap.isEmpty() ? 1 : displayMap.size()+1;
+                                ParkingTicket pt = vehicleServiceImpl.createEntry(v,level,counter);
+                                displayMap.put(pt.getVehicleRef(), pt);
+                                System.out.println(pt);
+                            } else {
+                                String msg = "No Space Available in Level " + level;
+                                throw new ParkingLotFullException(msg);
+                            }
+                        } catch (ParkingLotFullException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else if (opted ==2) {
+                        System.out.println("Enter Vehicle Ref No :");
+                        String refNum = scanner.next();
 
-                System.out.println("Enter Parking Level");
-                int level = scanner.nextInt();
-
-                ParkingTicket pt = vehicleServiceImpl.createEntry(v,level,counter);
-                displayMap.put(pt.getVehicleRef(), pt);
-
-                System.out.println(pt);
-
-
-        } else if (opted ==2) {
-            System.out.println("Enter Vehicle Ref No :");
-            String refNum = scanner.next();
-
-            ParkingTicket pt = vehicleServiceImpl.exitEntry(displayMap,refNum);
-            System.out.println(pt);
-            System.out.println(displayMap);
-            displayMap.remove(pt.getVehicleRef().toUpperCase());
-            System.out.println(displayMap);
-        } else {
-            System.out.println("Invalid Entry");
+                        ParkingTicket pt = vehicleServiceImpl.exitEntry(displayMap,refNum);
+                        System.out.println(pt);
+                        System.out.println(displayMap);
+                        displayMap.remove(pt.getVehicleRef().toUpperCase());
+                        System.out.println(displayMap);
+                    } else {
+                        String msg = "Invalid Input";
+                        throw new InvalidInputException(msg);
+                    }
+                } catch (InvalidInputException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                String msg = "No Slot Assigned by Admin";
+                throw new NoParkingSlotException(msg);
+            }
+        } catch (NoParkingSlotException e) {
+            e.printStackTrace();
         }
-    }
 
-    private static VehicleType getVehicle(int vehicleTypeNum) {
-        switch (vehicleTypeNum){
-            case 1:
-                return VehicleType.CAR;
-            case 2:
-                return VehicleType.BIKE;
-            case 3:
-                return VehicleType.BUS;
-            case 4:
-                return VehicleType.EV;
-            default:
-                return null;
-        }
     }
 
     private static void handleAdmin(Map<Integer, SlotMap> parkingslots) {
@@ -116,15 +129,19 @@ public class Main {
         int options = scanner.nextInt();
 
         AdminServiceImpl adminServiceImpl = new AdminServiceImpl();
-
-        if(options == 1){
-            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.addLevel(parkingslots);
-            System.out.println(addParkingSlots);
-        } else if (options == 2) {
-            Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.removeLevel(parkingslots);
-            System.out.println(addParkingSlots);
-        } else {
-            System.out.println("Inavlid Input");
+        try{
+            if(options == 1){
+                Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.addLevel(parkingslots);
+                System.out.println(addParkingSlots);
+            } else if (options == 2) {
+                Map<Integer,SlotMap> addParkingSlots = adminServiceImpl.removeLevel(parkingslots);
+                System.out.println(addParkingSlots);
+            } else {
+                String msg = "Invalid Input";
+                throw new InvalidInputException(msg);
+            }
+        } catch (InvalidInputException e) {
+            e.printStackTrace();
         }
     }
 
